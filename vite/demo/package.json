@@ -1,0 +1,17 @@
+{
+    "name": "demo",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "type": "module",
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "vue": "^3.4.31"
+    },
+    "devDependencies": {
+        "@vue/compiler-dom": "^3.4.31",
+        "lodash": "^4.17.21"
+    }
+}

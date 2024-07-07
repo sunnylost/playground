@@ -1,0 +1,31 @@
+{
+    "name": "mini-vite",
+    "version": "1.0.0",
+    "description": "",
+    "packageManager": "pnpm@9.4.0",
+    "type": "module",
+    "main": "index.js",
+    "scripts": {
+        "build": "tsx -p tsconfig.json",
+        "dev": "tsx index.ts ./demo"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/node": "^20.14.10",
+        "@types/ws": "^8.5.3",
+        "@vue/compiler-dom": "^3.4.31",
+        "chokidar": "^3.5.3",
+        "lodash": "^4.17.21",
+        "tsx": "^4.16.2",
+        "typescript": "^5.5.3"
+    },
+    "dependencies": {
+        "@fastify/websocket": "^10.0.1",
+        "es-module-lexer": "^1.0.3",
+        "esbuild": "^0.23.0",
+        "fastify": "^4.7.0",
+        "vue": "^3.4.31"
+    }
+}
