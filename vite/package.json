@@ -7,7 +7,7 @@
     "main": "index.js",
     "scripts": {
         "build": "tsx -p tsconfig.json",
-        "dev": "tsx index.ts ./demo"
+        "dev": "tsx watch index.ts ./demo"
     },
     "keywords": [],
     "author": "",
@@ -26,6 +26,8 @@
         "es-module-lexer": "^1.0.3",
         "esbuild": "^0.23.0",
         "fastify": "^4.7.0",
-        "vue": "^3.4.31"
+        "picocolors": "^1.0.1",
+        "vue": "^3.4.31",
+        "ws": "^8.18.0"
     }
 }
