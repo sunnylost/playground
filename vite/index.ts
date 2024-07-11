@@ -8,7 +8,13 @@ import { init as esModuleLexerInit, parse as esModuleLexerParse } from 'es-modul
 import esbuild from 'esbuild'
 import Fastify from 'fastify'
 import colors from 'picocolors'
-import { compileScript, compileStyle, compileTemplate, parse as sfcParse } from 'vue/compiler-sfc'
+import {
+    type SFCDescriptor,
+    compileScript,
+    compileStyle,
+    compileTemplate,
+    parse as sfcParse
+} from 'vue/compiler-sfc'
 import type { WebSocket } from 'ws'
 import { WebSocketServer as WebSocketServerRaw } from 'ws'
 
@@ -32,17 +38,18 @@ const codeCache = new Map<
         content: string
     }
 >()
+// handle vue file
+const descriptorCache = new Map()
 const bundleNameMap = new Map<string, [string, string]>()
 const bundleNamePrefix = '/@bundleModule/'
 const specialFileNamePrefix = '/@specialModule/'
 const externals = new Set<string>()
-const hash = createHash('sha256')
 const server = Fastify()
 
-type HMRType = 'connect' | 'full-reload'
+type HMRType = 'connect' | 'full-reload' | 'update'
 
 let hmrServer: {
-    send: (type: HMRType, message?: object) => void
+    send: (type: HMRType, updates?: object) => void
 }
 
 function createDir(path: string) {
@@ -61,8 +68,12 @@ function createTempCssFile(content = '') {
     `)
 }
 
+function getHash(content: string) {
+    return createHash('sha256').update(content).digest('hex').substring(0, 8)
+}
+
 function createTempFile(content = '') {
-    const tempFileName = `temp-${hash.update(content).copy().digest('hex').substring(0, 8)}.js`
+    const tempFileName = `temp-${getHash(content)}.js`
     const outputPath = `${cacheDir}/${tempFileName}`
 
     fs.writeFileSync(outputPath, content, {
@@ -77,7 +88,7 @@ function preBundle(moduleName: string) {
     }
 
     externals.add(moduleName)
-    const bundleName = `bundle-${hash.update(moduleName).copy().digest('hex').substring(0, 8)}.js`
+    const bundleName = `bundle-${getHash(moduleName)}.js`
     const outputPath = `${cacheDir}/${bundleName}`
     const tempFilePath = `${cacheDir}/temp-bundle.js`
     bundleNameMap.set(bundleName, [outputPath, `${bundleNamePrefix}${bundleName}`])
@@ -102,23 +113,39 @@ function preBundle(moduleName: string) {
     return bundleNameMap.get(bundleName)?.[1]
 }
 
-function serveFile(url: string) {
+function getDescriptor(
+    fileContent: string,
+    filePath: string
+): SFCDescriptor & {
+    id: string
+} {
+    const { descriptor } = sfcParse(fileContent)
+
+    return {
+        ...descriptor,
+        id: getHash(filePath)
+    }
+}
+
+function serveFile(rawURL: string) {
     let filePath = ''
     let isBundle = false
     let isLibrary = false
     let isExist = true
     let content = ''
 
-    if (url.startsWith(bundleNamePrefix)) {
+    const { pathname } = new URL(rawURL, 'http://localhost')
+
+    if (pathname.startsWith(bundleNamePrefix)) {
         isBundle = true
         isLibrary = true
-        filePath = bundleNameMap.get(url.replace(bundleNamePrefix, ''))?.[0] ?? ''
-    } else if (url.startsWith(specialFileNamePrefix)) {
+        filePath = bundleNameMap.get(pathname.replace(bundleNamePrefix, ''))?.[0] ?? ''
+    } else if (pathname.startsWith(specialFileNamePrefix)) {
         isBundle = false
         isLibrary = true
-        filePath = path.resolve(currentDir, url.replace(specialFileNamePrefix, ''))
+        filePath = path.resolve(currentDir, pathname.replace(specialFileNamePrefix, ''))
     } else {
-        filePath = path.resolve(rootDir, path.isAbsolute(url) ? `.${url}` : url)
+        filePath = path.resolve(rootDir, path.isAbsolute(pathname) ? `.${pathname}` : pathname)
     }
 
     if (codeCache.has(filePath)) {
@@ -131,10 +158,8 @@ function serveFile(url: string) {
         }
     }
 
-    console.log(`${filePath} 缓存失效，重新读取`)
-
     try {
-        const ext = path.extname(url)
+        const ext = path.extname(pathname)
         const fileContent = fs.readFileSync(filePath, {
             encoding: 'utf8'
         })
@@ -148,22 +173,23 @@ function serveFile(url: string) {
                 break
 
             case '.vue': {
-                const parsed = sfcParse(fileContent)
-                const scopeId = `v-${hash.update(fileContent).copy().digest('hex').substring(0, 8)}`
+                const descriptor = getDescriptor(fileContent, filePath)
+                descriptorCache.set(filePath, descriptor)
+                const scopeId = `v-${descriptor.id}`
 
-                const { content: compiledScript, bindings } = compileScript(parsed.descriptor, {
+                const { content: compiledScript, bindings } = compileScript(descriptor, {
                     id: scopeId
                 })
                 const { code: compiledTemplate } = compileTemplate({
                     filename: filePath,
                     id: scopeId,
-                    source: parsed.descriptor.template?.content ?? '',
+                    source: descriptor.template?.content ?? '',
                     compilerOptions: {
                         bindingMetadata: bindings
                     }
                 })
 
-                const compiledStyle = parsed.descriptor.styles
+                const compiledStyle = descriptor.styles
                     .map((style) => {
                         return (
                             compileStyle({
@@ -185,8 +211,24 @@ function serveFile(url: string) {
                 
                 sfc_main.render = render;
                 sfc_main.__file = '${filePath}';
-                sfc_main.__scopeId = '${scopeId}';
+                sfc_main.__scopeId = 'data-${scopeId}';
+                sfc_main.__hmrId = '${scopeId}';
                 
+                typeof __VUE_HMR_RUNTIME__ !== 'undefined' && __VUE_HMR_RUNTIME__.createRecord(sfc_main.__hmrId, sfc_main);
+                
+                // TODO: check if the template is the only thing that changed
+                // export const _rerender_only = true;
+                
+                import.meta.hot.accept((mod) => {
+                      if (!mod) return;
+                      const { default: updated, _rerender_only } = mod;
+                      if (_rerender_only) {
+                            __VUE_HMR_RUNTIME__.rerender(updated.__hmrId, updated.render);
+                      } else {
+                            __VUE_HMR_RUNTIME__.reload(updated.__hmrId, updated);
+                      }
+                });
+        
                 export default sfc_main;
             `)
 
@@ -208,6 +250,10 @@ function serveFile(url: string) {
                         code = out.text
                     }
                 }
+
+                code = `import { createHotContext as __createHotContext } from '/@specialModule/client/index.js';
+                import.meta.hot = __createHotContext("${pathname}");
+                ${code}`
 
                 break
             }
@@ -314,13 +360,56 @@ function createHMRServer() {
     })
 
     hmrServer = {
-        send(type: HMRType, message = {}) {
+        send(type: HMRType, updates = {}) {
             socket.send(
                 JSON.stringify({
                     type,
-                    message
+                    updates
                 })
             )
+        }
+    }
+}
+
+function isTemplateChanged(preDescriptor: SFCDescriptor, descriptor: SFCDescriptor) {
+    return preDescriptor.template?.content !== descriptor.template?.content
+}
+
+function isScriptChanged(preDescriptor: SFCDescriptor, descriptor: SFCDescriptor) {
+    return preDescriptor.script?.content !== descriptor.script?.content
+}
+
+function isStyleChanged(preDescriptor: SFCDescriptor, descriptor: SFCDescriptor) {
+    const oldStyles = preDescriptor.styles
+    const newStyles = descriptor.styles
+
+    return (
+        oldStyles.length !== newStyles.length ||
+        !oldStyles.every((styleBlock, i) => newStyles[i].content === styleBlock.content)
+    )
+}
+
+function handleHMRUpdate(event: 'change', filePath: string) {
+    const shortPath = path.relative(rootDir, filePath)
+
+    console.log(`[file change] ${shortPath}`)
+
+    if (shortPath.endsWith('.vue')) {
+        const preDescriptor = descriptorCache.get(filePath)
+        const descriptor = getDescriptor(fs.readFileSync(filePath, { encoding: 'utf8' }), filePath)
+
+        if (
+            isScriptChanged(preDescriptor, descriptor) ||
+            isTemplateChanged(preDescriptor, descriptor) ||
+            isStyleChanged(preDescriptor, descriptor)
+        ) {
+            descriptorCache.set(filePath, descriptor)
+            hmrServer.send('update', [
+                {
+                    type: 'js-update',
+                    path: `/${shortPath}`
+                }
+            ])
         }
     }
 }
@@ -333,13 +422,14 @@ function watchFileChange() {
         })
         .on('all', (event, path) => {
             if (path.endsWith('.html')) {
-                console.log('full reload')
                 hmrServer.send('full-reload')
             } else {
-                console.log('file changed:', path)
                 if (codeCache.has(path)) {
-                    console.log(`${path} 缓存失效.`)
                     codeCache.delete(path)
+                }
+
+                if (event === 'change') {
+                    handleHMRUpdate('change', path)
                 }
             }
         })
