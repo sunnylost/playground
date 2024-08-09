@@ -1,8 +1,11 @@
 {
     "compilerOptions": {
-        "moduleResolution": "node",
+        "moduleResolution": "Bundler",
         "noEmit": true,
         "skipLibCheck": true,
-        "allowImportingTsExtensions": true
+        "allowImportingTsExtensions": true,
+        "target": "ESNext",
+        "module": "ESNext",
+        "noImplicitAny": false
     }
 }

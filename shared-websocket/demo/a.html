@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Page A</title>
+</head>
+<body>
+<button onclick="broadcast()">Broadcast</button>
+<script>
+const worker = new SharedWorker('../src/index.js')
+
+worker.port.onmessage = message => {
+  console.log('received!',message.data)
+}
+
+function broadcast() {
+  worker.port.postMessage('say hi. from A.')
+}
+</script>
+</body>
+</html>
