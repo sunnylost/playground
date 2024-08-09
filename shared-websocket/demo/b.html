@@ -14,7 +14,10 @@
     }
 
     function broadcast() {
-        worker.port.postMessage('say hi.')
+        worker.port.postMessage({
+            type: 'broadcast',
+            content: 'Hi from B'
+        })
     }
 </script>
 </body>

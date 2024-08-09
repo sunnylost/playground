@@ -14,7 +14,10 @@ worker.port.onmessage = message => {
 }
 
 function broadcast() {
-  worker.port.postMessage('say hi. from A.')
+  worker.port.postMessage({
+      type: 'broadcast',
+      content: 'Hi from A'
+  })
 }
 </script>
 </body>

@@ -5,6 +5,7 @@ function initWebSocket() {
         return
     }
 
+    isInitialized = true
     const ws = new WebSocket('ws://localhost:9999')
 
     ws.onopen = () => {
