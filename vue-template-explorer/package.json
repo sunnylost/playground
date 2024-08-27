@@ -1,0 +1,35 @@
+{
+    "name": "vue3-ast-explorer",
+    "packageManager": "pnpm@9.9.0",
+    "private": true,
+    "version": "0.0.1",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc -b && vite build",
+        "fmt": "biome format --fix ./src"
+    },
+    "dependencies": {
+        "@codemirror/lang-vue": "^0.1.3",
+        "@vue/compiler-core": "^3.4.38",
+        "codemirror": "^6.0.1",
+        "react": "19.0.0-rc-b57d2823-20240822",
+        "react-dom": "19.0.0-rc-b57d2823-20240822",
+        "vue": "^3.4.38"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^1.8.3",
+        "@types/react": "npm:types-react@rc",
+        "@types/react-dom": "npm:types-react-dom@rc",
+        "@vitejs/plugin-react": "^4.3.1",
+        "autoprefixer": "^10.4.20",
+        "postcss": "^8.4.41",
+        "tailwindcss": "^3.4.10",
+        "typescript": "^5.5.3",
+        "vite": "^5.4.1"
+    },
+    "overrides": {
+        "@types/react": "npm:types-react@rc",
+        "@types/react-dom": "npm:types-react-dom@rc"
+    }
+}

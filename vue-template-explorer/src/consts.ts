@@ -1,0 +1,5 @@
+export const OBJECT_FOLD_START = '{'
+export const OBJECT_FOLD_END = '}'
+export const ARRAY_FOLD_START = '['
+export const ARRAY_FOLD_END = ']'
+export const QUOTE = '"'
