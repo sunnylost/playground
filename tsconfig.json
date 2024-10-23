@@ -6,6 +6,7 @@
         "allowImportingTsExtensions": true,
         "target": "ESNext",
         "module": "ESNext",
-        "noImplicitAny": false
+        "noImplicitAny": false,
+        "strict": true
     }
 }

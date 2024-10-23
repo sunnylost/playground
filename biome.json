@@ -26,13 +26,19 @@
         "rules": {
             "recommended": true,
             "suspicious": {
-                "noExplicitAny": "off"
+                "noExplicitAny": "off",
+                "noRedeclare": "off",
+                "noConfusingVoidType": "off"
             },
             "style": {
-                "noParameterAssign": "off"
+                "noParameterAssign": "off",
+                "noUselessElse": "off",
+                "noNonNullAssertion": "off",
+                "useTemplate": "off"
             },
             "complexity": {
-                "noBannedTypes": "off"
+                "noBannedTypes": "off",
+                "useArrowFunction": "off"
             }
         }
     },
