@@ -1,0 +1,86 @@
+:root {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+
+    color-scheme: light dark;
+    color: rgba(255, 255, 255, 0.87);
+    background-color: #242424;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.root {
+    display: flex;
+    height: 100%;
+}
+
+.main {
+    width: 50%;
+    margin: auto;
+}
+
+.topbar {
+    display: flex;
+    justify-items: center;
+}
+
+@property --digit {
+    syntax: '<number>';
+    inherits: false;
+    initial-value: 0;
+}
+
+.display {
+    display: flex;
+    justify-items: center;
+
+    div {
+        width: 13px;
+        height: 23px;
+        background: url('./assets/classic.png')
+            min(calc(-14px * (var(--digit) - 1)), 13px) 0;
+    }
+}
+
+.smile {
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+    background: url('./assets/classic.png') 0 -24px;
+
+    &.pressed {
+        background-position: -27px -24px;
+    }
+}
+
+.field {
+    .row {
+        display: flex;
+        align-items: center;
+    }
+
+    .cell {
+        display: flex;
+        align-items: center;
+        justify-items: center;
+        width: 16px;
+        height: 16px;
+        background: url('./assets/classic.png') 0 -51px;
+
+        &.opened {
+            background-position: -17px -51px;
+        }
+
+        i {
+            display: block;
+            width: 14px;
+            height: 100%;
+            background: url('./assets/classic.png')
+                calc(-17px * (var(--digit) - 1)) -68px;
+        }
+    }
+}
