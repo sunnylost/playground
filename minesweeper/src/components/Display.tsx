@@ -15,17 +15,17 @@ export function Display({ value }: { value: number | string }) {
                 style={{
                     '--digit': digits[0]
                 }}
-            ></div>
+            />
             <div
                 style={{
                     '--digit': digits[1]
                 }}
-            ></div>
+            />
             <div
                 style={{
                     '--digit': digits[2]
                 }}
-            ></div>
+            />
         </div>
     )
 }

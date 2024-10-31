@@ -1,18 +1,30 @@
+import { useAtom, useAtomValue } from 'jotai'
+import { useSetAtom } from 'jotai/index'
 import { useEffect, useState } from 'react'
-import { useAppContext } from '../state'
+import {
+    FAIL,
+    type GameStatus,
+    INIT,
+    SUCCESS,
+    fieldsReducerAtom,
+    gameConfigAtom,
+    gameStatusAtom
+} from '../states'
+
+function isFinished(gameStatus: GameStatus) {
+    return gameStatus === FAIL || gameStatus === SUCCESS
+}
 
 export function Smile() {
-    const state = useAppContext()
+    const gameConfig = useAtomValue(gameConfigAtom)
+    const dispatch = useSetAtom(fieldsReducerAtom)
+    const [gameStatus, setGameStatus] = useAtom(gameStatusAtom)
     const [iconState, setIconState] = useState('normal')
     const [isPressed, setIsPressed] = useState(false)
 
     useEffect(() => {
-        if (!state) {
-            return
-        }
-
-        if (state.state !== 'init') {
-            setIconState('fail')
+        if (isFinished(gameStatus)) {
+            setIconState(gameStatus)
             return
         }
 
@@ -21,10 +33,10 @@ export function Smile() {
         } else {
             setIconState('normal')
         }
-    }, [state, isPressed])
+    }, [gameStatus, isPressed])
 
     function handlePointerDown() {
-        if (!state || state.state !== 'init') {
+        if (isFinished(gameStatus)) {
             return
         }
 
@@ -33,6 +45,11 @@ export function Smile() {
 
     function handlePointerUp() {
         setIsPressed(false)
+        setGameStatus(INIT)
+        dispatch({
+            type: INIT,
+            payload: gameConfig
+        })
     }
 
     return (
@@ -41,6 +58,6 @@ export function Smile() {
             onPointerDown={() => handlePointerDown()}
             onPointerOut={() => handlePointerUp()}
             onPointerUp={() => handlePointerUp()}
-        ></div>
+        />
     )
 }

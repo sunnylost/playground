@@ -24,8 +24,10 @@
 }
 
 .topbar {
+    margin-top: 4px;
     display: flex;
     justify-items: center;
+    justify-content: space-between;
 }
 
 @property --digit {
@@ -41,8 +43,7 @@
     div {
         width: 13px;
         height: 23px;
-        background: url('./assets/classic.png')
-            min(calc(-14px * (var(--digit) - 1)), 13px) 0;
+        background: url('./assets/classic.png') min(calc(-14px * (var(--digit) - 1)), 13px) 0;
     }
 }
 
@@ -53,11 +54,20 @@
     background: url('./assets/classic.png') 0 -24px;
 
     &.pressed {
-        background-position: -27px -24px;
+        background-position-x: -27px;
+    }
+
+    &.fail {
+        background-position-x: -108px;
     }
 }
 
 .field {
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
     .row {
         display: flex;
         align-items: center;
@@ -72,15 +82,27 @@
         background: url('./assets/classic.png') 0 -51px;
 
         &.opened {
-            background-position: -17px -51px;
+            background-position-x: -17px;
+        }
+
+        &.marked {
+            background-position-x: -34px;
         }
 
         i {
             display: block;
             width: 14px;
             height: 100%;
-            background: url('./assets/classic.png')
-                calc(-17px * (var(--digit) - 1)) -68px;
+            background: url('./assets/classic.png') calc(-17px * (var(--digit) - 1)) -68px;
         }
+    }
+}
+
+.game-success .field .mine,
+.game-fail .field .mine {
+    background-position-x: -85px;
+
+    &.boomed {
+        background-position-x: -102px;
     }
 }
