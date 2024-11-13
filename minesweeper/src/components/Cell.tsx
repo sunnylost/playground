@@ -1,23 +1,23 @@
-import { useAtom, useSetAtom } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
 import {
-    CLICK,
-    type CellState,
-    FAIL,
-    MARK,
-    SUCCESS,
-    fieldsReducerAtom,
-    gameStatusAtom
+    type Cell,
+    STATUS_FAIL,
+    STATUS_SUCCESS,
+    useGameStatus,
+    useMarkField,
+    useOpenField
 } from '../states'
 
-export function Cell({ row, col, isMine, isOpened, isMarked, hint }: CellState) {
-    const dispatch = useSetAtom(fieldsReducerAtom)
-    const [gameStatus, setGameStatus] = useAtom(gameStatusAtom)
+export function Cell({ row, col, isMine, isOpened, isMarked, hint }: Cell) {
+    const gameStatus = useGameStatus()
+    const openField = useOpenField()
+    const markField = useMarkField()
     const [cellClass, setCellClass] = useState('')
     const [isBoom, setIsBoom] = useState(false)
 
+    // TODO: move to store
     const isGameFinished = useCallback(
-        () => gameStatus === SUCCESS || gameStatus === FAIL,
+        () => gameStatus === STATUS_SUCCESS || gameStatus === STATUS_FAIL,
         [gameStatus]
     )
 
@@ -31,47 +31,38 @@ export function Cell({ row, col, isMine, isOpened, isMarked, hint }: CellState) 
         [isMine, isOpened, isMarked, isBoom]
     )
 
-    function handleClick() {
+    const handleClick = useCallback(() => {
         if (isOpened || isGameFinished()) {
             return
         }
 
         if (isMine) {
             setIsBoom(true)
-            setGameStatus(FAIL)
         }
 
-        dispatch({
-            type: CLICK,
-            payload: {
-                row,
-                col
-            }
-        })
-    }
+        openField(row, col)
+    }, [isOpened, isMine, openField, isGameFinished, row, col])
 
-    function handleContextMenu(e: MouseEvent) {
-        if (isOpened || isGameFinished()) {
-            return
-        }
-
-        e.preventDefault()
-        dispatch({
-            type: MARK,
-            payload: {
-                row,
-                col
+    const handleContextMenu = useCallback(
+        (e: MouseEvent) => {
+            if (isOpened || isGameFinished()) {
+                return
             }
-        })
-    }
+
+            e.preventDefault()
+            markField(row, col)
+        },
+        [isOpened, isGameFinished, markField, col, row]
+    )
 
     return (
         <div
             className={`cell ${cellClass}`}
             onClick={() => handleClick()}
-            onContextMenu={(e) => handleContextMenu(e)}
+            onKeyUp={() => {}}
+            onContextMenu={(e) => handleContextMenu(e as unknown as MouseEvent)}
         >
-            {hint !== 0 && !isMine && (
+            {hint !== 0 && !isMine && isOpened && (
                 <i
                     style={{
                         '--digit': hint

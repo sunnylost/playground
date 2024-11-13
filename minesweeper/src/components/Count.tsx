@@ -1,9 +1,8 @@
-import { useAtomValue } from 'jotai'
-import { gameLevelAtom } from '../states'
+import { useGameStore } from '../states'
 import { Display } from './Display.tsx'
 
 export function Count() {
-    const gameLevel = useAtomValue(gameLevelAtom)
+    const gameLevel = useGameStore((state) => state.level)
 
     return <Display value={gameLevel} />
 }

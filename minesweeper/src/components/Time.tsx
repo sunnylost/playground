@@ -1,27 +1,24 @@
-import { useAtomValue } from 'jotai/index'
-import { useEffect, useState } from 'react'
-import { BEGIN, gameStatusAtom } from '../states'
+import { useEffect, useRef, useState } from 'react'
+import { STATUS_BEGIN, useGameStatus } from '../states'
 import { Display } from './Display'
 
 export function Time() {
-    const gameStatus = useAtomValue(gameStatusAtom)
+    const gameStatus = useGameStatus()
     const [timeCount, setTimeCount] = useState(0)
-    const [timerId, setTimerId] = useState(0)
+    const timerIdRef = useRef(0)
 
     useEffect(() => {
-        clearTimeout(timerId)
+        clearTimeout(timerIdRef.current)
 
-        if (gameStatus === BEGIN) {
-            const timeoutID = window.setInterval(() => {
+        if (gameStatus === STATUS_BEGIN) {
+            timerIdRef.current = window.setInterval(() => {
                 setTimeCount((value) => value + 1)
             }, 1000)
-
-            setTimerId(timeoutID)
         }
 
         return () => {
-            clearInterval(timerId)
-            setTimerId(0)
+            clearInterval(timerIdRef.current)
+            setTimeCount(0)
         }
     }, [gameStatus])
 

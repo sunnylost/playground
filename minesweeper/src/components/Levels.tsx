@@ -1,13 +1,12 @@
-import { useSetAtom } from 'jotai'
-import { LevelList, gameLevelAtom } from '../states'
+import { LevelList, useGameStore } from '../states'
 
 export function Levels() {
-    const setGameLevel = useSetAtom(gameLevelAtom)
+    const startGame = useGameStore((state) => state.start)
 
     return (
-        <select>
+        <select name="level">
             {LevelList.map((level) => (
-                <option key={level.name} onKeyUp={() => setGameLevel(level.value)}>
+                <option key={level.name} onPointerUp={() => startGame()}>
                     {level.name}
                 </option>
             ))}

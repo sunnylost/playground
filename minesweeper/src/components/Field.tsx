@@ -1,9 +1,11 @@
-import { useAtomValue } from 'jotai'
-import { fieldsReducerAtom } from '../states'
+import { useGameFields } from '../states'
 import { Cell } from './Cell'
 
 export function Field() {
-    const fields = useAtomValue(fieldsReducerAtom)
+    // https://github.com/pmndrs/zustand/discussions/1936
+    const fields = useGameFields()
+
+    console.log('fields = ', fields)
 
     return (
         <div className="field">

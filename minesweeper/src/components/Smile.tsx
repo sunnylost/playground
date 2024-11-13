@@ -1,24 +1,19 @@
-import { useAtom, useAtomValue } from 'jotai'
-import { useSetAtom } from 'jotai/index'
 import { useEffect, useState } from 'react'
 import {
-    FAIL,
     type GameStatus,
-    INIT,
-    SUCCESS,
-    fieldsReducerAtom,
-    gameConfigAtom,
-    gameStatusAtom
+    STATUS_FAIL,
+    STATUS_SUCCESS,
+    useGameStatus,
+    useGameStore
 } from '../states'
 
 function isFinished(gameStatus: GameStatus) {
-    return gameStatus === FAIL || gameStatus === SUCCESS
+    return gameStatus === STATUS_FAIL || gameStatus === STATUS_SUCCESS
 }
 
 export function Smile() {
-    const gameConfig = useAtomValue(gameConfigAtom)
-    const dispatch = useSetAtom(fieldsReducerAtom)
-    const [gameStatus, setGameStatus] = useAtom(gameStatusAtom)
+    const gameStatus = useGameStatus()
+    const initGame = useGameStore((state) => state.start)
     const [iconState, setIconState] = useState('normal')
     const [isPressed, setIsPressed] = useState(false)
 
@@ -45,11 +40,7 @@ export function Smile() {
 
     function handlePointerUp() {
         setIsPressed(false)
-        setGameStatus(INIT)
-        dispatch({
-            type: INIT,
-            payload: gameConfig
-        })
+        initGame()
     }
 
     return (
