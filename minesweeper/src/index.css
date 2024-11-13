@@ -83,6 +83,10 @@
 
         &.opened {
             background-position-x: -17px;
+
+            i {
+                display: block;
+            }
         }
 
         &.marked {
@@ -90,7 +94,7 @@
         }
 
         i {
-            display: block;
+            display: none;
             width: 14px;
             height: 100%;
             background: url('./assets/classic.png') calc(-17px * (var(--digit) - 1)) -68px;

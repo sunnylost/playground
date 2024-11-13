@@ -45,11 +45,12 @@ export function Cell({ row, col, isMine, isOpened, isMarked, hint }: Cell) {
 
     const handleContextMenu = useCallback(
         (e: MouseEvent) => {
+            e.preventDefault()
+
             if (isOpened || isGameFinished()) {
                 return
             }
 
-            e.preventDefault()
             markField(row, col)
         },
         [isOpened, isGameFinished, markField, col, row]

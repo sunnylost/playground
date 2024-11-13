@@ -1,20 +1,14 @@
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useEffect } from 'react'
 import { Field, Levels, TopBar } from './components'
-import { INIT, fieldsReducerAtom, gameConfigAtom, gameStatusAtom } from './states'
+import { useGameStatus, useGameStore } from './states'
 
 function App() {
-    const gameConfig = useAtomValue(gameConfigAtom)
-    const [gameStatus, setGameStatus] = useAtom(gameStatusAtom)
-    const dispatch = useSetAtom(fieldsReducerAtom)
+    const gameStatus = useGameStatus()
+    const startGame = useGameStore((state) => state.start)
 
     useEffect(() => {
-        dispatch({
-            type: INIT,
-            payload: gameConfig
-        })
-        setGameStatus(INIT)
-    }, [dispatch, gameConfig, setGameStatus])
+        startGame()
+    }, [startGame])
 
     return (
         <div className={`main game-${gameStatus}`}>

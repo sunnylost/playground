@@ -5,8 +5,6 @@ export function Field() {
     // https://github.com/pmndrs/zustand/discussions/1936
     const fields = useGameFields()
 
-    console.log('fields = ', fields)
-
     return (
         <div className="field">
             {fields.map((field) => (
